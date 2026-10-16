@@ -29,8 +29,31 @@ class PantallaJuego extends StatefulWidget {
 }
 
 class _PantallaJuegoState extends State<PantallaJuego> {
-  // Las 16 casillas del tablero: del 1 al 15, y el 0 representa el espacio vacío.
+  // Las 16 casillas del tablero: 0 representa el espacio vacío.
   List<int> fichas = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0];
+
+  // Función para mover fichas si están adyacentes al espacio vacío (0)
+  void _moverFicha(int index) {
+    int vacioIndex = fichas.indexOf(0);
+
+    // Calcular la fila y columna de la ficha presionada y del hueco vacío
+    int filaFicha = index ~/ 4;
+    int colFicha = index % 4;
+    int filaVacio = vacioIndex ~/ 4;
+    int colVacio = vacioIndex % 4;
+
+    // Verificar si la ficha está arriba, abajo, a la izquierda o a la derecha del hueco
+    bool esAdyacente =
+        (filaFicha == filaVacio && (colFicha - colVacio).abs() == 1) ||
+        (colFicha == colVacio && (filaFicha - filaVacio).abs() == 1);
+
+    if (esAdyacente) {
+      setState(() {
+        fichas[vacioIndex] = fichas[index];
+        fichas[index] = 0;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +80,7 @@ class _PantallaJuegoState extends State<PantallaJuego> {
               itemBuilder: (context, index) {
                 int valor = fichas[index];
 
-                // Si el valor es 0, dibujamos el espacio vacío
+                // Si es 0, renderizamos el espacio vacío
                 if (valor == 0) {
                   return Container(
                     decoration: BoxDecoration(
@@ -67,26 +90,29 @@ class _PantallaJuegoState extends State<PantallaJuego> {
                   );
                 }
 
-                // Si tiene número, dibujamos la ficha azul con su número
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.indigo,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$valor',
-                      style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                // Si tiene número, envolvemos en GestureDetector para capturar clics
+                return GestureDetector(
+                  onTap: () => _moverFicha(index),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.indigo,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(2, 2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$valor',
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
